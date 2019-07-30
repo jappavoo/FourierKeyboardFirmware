@@ -1,5 +1,7 @@
 #include QMK_KEYBOARD_H
 
+#include  <pincontrol.h>
+
 extern keymap_config_t keymap_config;
 
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
@@ -53,3 +55,91 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 
 };
+
+
+#define  MANUAL_UART_PIN_DEBUG
+extern void test_init(void);
+extern void test_pin(int i, int p);
+
+void matrix_init_user(void) {
+   // This will disable the red LEDs on the ProMicros
+#ifdef CONSOLE_ENABLE
+  dprint("matrix_init_user: BEGIN\n");
+#endif 
+
+#ifdef MANUAL_UART_PIN_DEBUG
+#if 0
+  pinMode(B5, PinDirectionOutput);
+  pinMode(B7, PinDirectionOutput);
+  pinMode(C7, PinDirectionOutput);
+  pinMode(F1, PinDirectionOutput);
+  pinMode(F0, PinDirectionOutput);
+#else
+  test_init();
+#endif
+#endif
+  
+#ifdef CONSOLE_ENABLE
+  dprint("matrix_init_user: END\n");
+#endif 
+  
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  // If console is enabled, it will print the matrix position and status of each key pressed
+#ifdef CONSOLE_ENABLE
+    dprintf("KL: kc: %u, col: %u, row: %u, pressed: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed);
+#endif
+#ifdef MANUAL_UART_PIN_DEBUG
+#if 0
+    if (record->event.key.col ==  1) {
+      if (record->event.pressed) {
+	digitalWrite(B5, PinLevelHigh);
+	dprint("B5:H\n");
+      }else {
+	digitalWrite(B5, PinLevelLow);
+	dprint("B5:L\n");
+      }
+    }
+    if (record->event.key.col ==  2) {
+      if (record->event.pressed) {
+	digitalWrite(B7, PinLevelHigh);
+	dprint("B7:H\n");
+      }else {
+	digitalWrite(B7, PinLevelLow);
+	dprint("B7:L\n");
+      }
+    }
+    if (record->event.key.col ==  3) {
+      if (record->event.pressed) {
+	digitalWrite(C7, PinLevelHigh);
+	dprint("C7:H\n");
+      }else {
+	digitalWrite(C7, PinLevelLow);
+	dprint("C7:L\n");
+      }
+    }
+    if (record->event.key.col ==  4) {
+      if (record->event.pressed) {
+	digitalWrite(F1, PinLevelHigh);
+	dprint("F1:H\n");
+      }else {
+	digitalWrite(F1, PinLevelLow);
+	dprint("F1:L\n");
+      }
+    }
+    if (record->event.key.col ==  5) {
+      if (record->event.pressed) {
+	digitalWrite(F0, PinLevelHigh);
+	dprint("F0:H\n");
+      }else {
+	digitalWrite(F0, PinLevelLow);
+	dprint("F0:L\n");
+      }
+    }
+#else
+    test_pin(record->event.key.col, record->event.pressed);
+#endif
+#endif
+  return true;
+}
